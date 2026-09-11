@@ -26,6 +26,9 @@ export const metadata: Metadata = {
   authors: [{ name: "ShunyaPulse" }],
   creator: "ShunyaPulse",
   publisher: "ShunyaPulse",
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+  },
   openGraph: {
     title: "Kanban Cloud - Modern Agile Task Management Platform",
     description:
