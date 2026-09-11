@@ -32,7 +32,9 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: type=raw,value=latest
+          tags: |
+            type=raw,value=latest
+            type=sha,format=long,prefix=
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
@@ -61,10 +63,9 @@ jobs:
         if: env.GCP_CREDS != ''
         env:
           GCP_CREDS: ${{ secrets.GCP_CREDENTIALS }}
-        # NOTE: Be sure to set up the ENVIRONMENT VARIABLES (DATABASE_URL, REDIS_URL) directly in the GCP console for this new service
         run: |
-          # Lowercase the image name for GCP
-          IMAGE=$(echo "ghcr.io/${{ env.IMAGE_NAME }}:latest" | tr '[:upper:]' '[:lower:]')
+          # Use unique commit SHA tag so Cloud Run never caches old images
+          IMAGE=$(echo "ghcr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}" | tr '[:upper:]' '[:lower:]')
           gcloud run deploy kanban-cloud \
             --image=$IMAGE \
             --region=asia-south1 \
