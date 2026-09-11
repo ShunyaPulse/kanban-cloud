@@ -77,13 +77,13 @@ export default function RootLayout({
 
         {/* Adsterra Social Bar */}
         <Script 
-          src="https://pl31276438.profitableratecpmnetwork.com/07/86/2e/07862e2f4fe218fd5671878c37c8f497.js" 
+          src="https://pl31292004.profitableratecpmnetwork.com/ec/e7/6c/ece76ca482e275898579d4ac5ad5f0d8.js" 
           strategy="afterInteractive" 
         />
         
         {/* Adsterra Pop Under */}
         <Script 
-          src="https://pl31276439.profitableratecpmnetwork.com/60/bd/b3/60bdb3aeceb20590582c5794fdbd1704.js" 
+          src="https://pl31292004.profitableratecpmnetwork.com/ec/e7/6c/ece76ca482e275898579d4ac5ad5f0d8.js" 
           strategy="afterInteractive" 
         />
       </body>
