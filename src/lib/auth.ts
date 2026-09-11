@@ -1,4 +1,4 @@
-﻿import { NextAuthOptions } from "next-auth";
+import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import PostgresAdapter from "@auth/pg-adapter";
@@ -24,8 +24,9 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
+        const cleanEmail = credentials.email.trim().toLowerCase();
         const db = getDb();
-        const res = await db.query('SELECT * FROM users WHERE email = $1', [credentials.email]);
+        const res = await db.query('SELECT * FROM users WHERE LOWER(TRIM(email)) = $1', [cleanEmail]);
         const user = res.rows[0];
 
         if (!user || !user.password) {

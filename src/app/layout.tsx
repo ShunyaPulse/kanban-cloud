@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import "./globals.css";
 import Link from "next/link";
 import { Providers } from "./providers";
@@ -65,7 +65,7 @@ export default function RootLayout({
         {children}
         <footer className="shrink-0 border-t border-slate-800 bg-slate-900/80 backdrop-blur-sm px-4 sm:px-6 py-6">
           <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-slate-400">
-            <p>Â© {new Date().getFullYear()} Kanban Cloud by ShunyaPulse. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} Kanban Cloud by ShunyaPulse. All rights reserved.</p>
             <nav className="flex flex-wrap justify-center gap-4 sm:gap-6">
               <Link href="/" className="hover:text-slate-200 transition-colors">Home</Link>
               <Link href="/about" className="hover:text-slate-200 transition-colors">About</Link>
