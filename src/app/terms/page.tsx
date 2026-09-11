@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
-  description: "Terms of Service for Kanban Board - Read the terms and conditions for using our free task management tool.",
+  description: "Terms of Service for Kanban Cloud - Guidelines and conditions for using our open-source task management platform.",
 };
 
 export default function Terms() {
@@ -12,103 +12,86 @@ export default function Terms() {
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12">
         <Link href="/" className="text-blue-400 hover:text-blue-300 text-sm mb-6 inline-block">← Back to Board</Link>
         <h1 className="text-3xl font-bold text-slate-100 mb-2">Terms of Service</h1>
-        <p className="text-slate-400 text-sm mb-8">Last updated: September 10, 2026</p>
+        <p className="text-slate-400 text-sm mb-8">Last updated: September 11, 2026</p>
 
         <div className="prose prose-invert prose-slate max-w-none space-y-6 text-slate-300 leading-relaxed">
           <section>
             <h2 className="text-xl font-semibold text-slate-100 mt-8 mb-3">1. Acceptance of Terms</h2>
             <p>
-              By accessing and using Kanban Board (&quot;the Service&quot;), you accept and agree to be bound by
-              these Terms of Service. If you do not agree to these terms, please do not use the Service.
+              By accessing or using Kanban Cloud (&quot;the Service&quot;), created by ShunyaPulse, you agree to comply with and
+              be bound by these Terms of Service. If you disagree with any portion of these terms, please discontinue use
+              of the Service.
             </p>
           </section>
 
           <section>
             <h2 className="text-xl font-semibold text-slate-100 mt-8 mb-3">2. Description of Service</h2>
             <p>
-              Kanban Board is a free, browser-based task management tool that allows users to organize
-              tasks using a Kanban-style board with drag-and-drop functionality. The Service includes
-              features such as card creation, column management, subtask tracking, real-time analytics,
-              WIP (Work In Progress) limits, and import/export capabilities.
+              Kanban Cloud provides a web-based, cloud-synchronized Agile task management system. Features include
+              customizable Kanban columns, task cards with priority tags and descriptions, subtask checklists,
+              WIP limit alerts, real-time lead-time/throughput calculations, JSON import/export, and offline PWA capability.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-slate-100 mt-8 mb-3">3. Data Storage</h2>
+            <h2 className="text-xl font-semibold text-slate-100 mt-8 mb-3">3. Cloud Persistence & User Responsibility</h2>
             <p>
-              All data created through the Service is stored locally in your browser&apos;s local storage.
-              We do not store your board data on any server. This means:
+              Data is automatically stored across our serverless PostgreSQL and memory caching infrastructure.
+              While we implement high-availability serverless architecture and automated database resilience, we strongly
+              encourage users to periodically utilize the built-in <strong>Export</strong> feature to download personal JSON backups
+              of mission-critical project boards.
             </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-slate-100 mt-8 mb-3">4. Acceptable Use</h2>
+            <p>You agree to use the Service strictly for lawful productivity purposes and will not:</p>
             <ul className="list-disc pl-6 space-y-1">
-              <li>Your data is accessible only from the browser and device where it was created</li>
-              <li>Clearing your browser data will permanently delete your board data</li>
-              <li>We cannot recover lost data as we do not have access to it</li>
-              <li>You are responsible for exporting and backing up your data using the Export feature</li>
+              <li>Attempt to overload, abuse, or initiate denial-of-service attacks against the API or cloud infrastructure</li>
+              <li>Inject malicious payloads, exploits, or harmful scripts into task data fields</li>
+              <li>Reverse engineer or misuse API routes in violation of applicable laws</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-slate-100 mt-8 mb-3">4. User Responsibilities</h2>
-            <p>You agree to:</p>
-            <ul className="list-disc pl-6 space-y-1">
-              <li>Use the Service only for lawful purposes</li>
-              <li>Not attempt to interfere with the proper functioning of the Service</li>
-              <li>Not attempt to gain unauthorized access to any part of the Service</li>
-              <li>Maintain your own backups of important data using the Export feature</li>
-            </ul>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-slate-100 mt-8 mb-3">5. Intellectual Property</h2>
+            <h2 className="text-xl font-semibold text-slate-100 mt-8 mb-3">5. Intellectual Property & License</h2>
             <p>
-              The Service, including its design, features, and code, is the intellectual property of
-              ShunyaPulse and is open-source under the MIT License. The source code is available on{" "}
-              <a href="https://github.com/ShunyaPulse/kanban-board" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 underline">
+              Kanban Cloud is an open-source software project licensed under the <strong>MIT License</strong>.
+              You are free to inspect, fork, modify, and host your own instance of the project in accordance with MIT licensing terms.
+              Source code and development instructions are available on{" "}
+              <a href="https://github.com/ShunyaPulse/kanban-cloud" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 underline">
                 GitHub
               </a>.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-slate-100 mt-8 mb-3">6. Advertisements</h2>
+            <h2 className="text-xl font-semibold text-slate-100 mt-8 mb-3">6. Disclaimer of Warranties</h2>
             <p>
-              The Service may display advertisements provided by third-party advertising networks,
-              including Google AdSense. These advertisements help us keep the Service free for all
-              users. By using the Service, you agree to the display of advertisements.
+              The Service is provided &quot;as is&quot; and &quot;as available&quot; without warranties of any kind, whether express or implied.
+              We do not guarantee that the service will remain uninterrupted, error-free, or compatible with every legacy browser environment.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-slate-100 mt-8 mb-3">7. Disclaimer of Warranties</h2>
+            <h2 className="text-xl font-semibold text-slate-100 mt-8 mb-3">7. Limitation of Liability</h2>
             <p>
-              The Service is provided &quot;as is&quot; and &quot;as available&quot; without any warranties of any kind,
-              either express or implied. We do not guarantee that the Service will be uninterrupted,
-              error-free, or completely secure.
+              To the fullest extent permitted by law, ShunyaPulse shall not be liable for any indirect, incidental, or consequential damages
+              or loss of data arising from use or inability to use the Service.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-slate-100 mt-8 mb-3">8. Limitation of Liability</h2>
+            <h2 className="text-xl font-semibold text-slate-100 mt-8 mb-3">8. Changes to Terms</h2>
             <p>
-              In no event shall ShunyaPulse be liable for any indirect, incidental, special, or
-              consequential damages arising from your use of the Service, including but not limited
-              to loss of data.
+              We reserve the right to revise these Terms of Service periodically. Any updates will be posted here with a revised date.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-slate-100 mt-8 mb-3">9. Changes to Terms</h2>
+            <h2 className="text-xl font-semibold text-slate-100 mt-8 mb-3">9. Contact</h2>
             <p>
-              We reserve the right to modify these Terms of Service at any time. Changes will be
-              posted on this page with an updated revision date. Continued use of the Service after
-              changes constitutes acceptance of the new terms.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-slate-100 mt-8 mb-3">10. Contact</h2>
-            <p>
-              If you have any questions about these Terms, please visit our{" "}
+              For legal questions or inquiries regarding these Terms, please reach out via our{" "}
               <Link href="/contact" className="text-blue-400 hover:text-blue-300 underline">Contact page</Link>.
             </p>
           </section>

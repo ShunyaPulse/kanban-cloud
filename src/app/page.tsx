@@ -38,7 +38,7 @@ export default function Home() {
           <div className="h-6 w-px bg-slate-700 hidden sm:block"></div>
           <ImportExport />
           <a
-            href="https://github.com/ShunyaPulse/kanban-board"
+            href="https://github.com/ShunyaPulse/kanban-cloud"
             target="_blank"
             rel="noopener noreferrer"
             className="p-2.5 text-slate-400 hover:text-white hover:bg-slate-800/80 rounded-xl border border-transparent hover:border-slate-700/60 transition-all backdrop-blur-sm"

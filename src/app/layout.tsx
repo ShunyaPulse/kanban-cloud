@@ -70,7 +70,7 @@ export default function RootLayout({
               <Link href="/privacy-policy" className="hover:text-slate-200 transition-colors">Privacy Policy</Link>
               <Link href="/terms" className="hover:text-slate-200 transition-colors">Terms of Service</Link>
               <Link href="/contact" className="hover:text-slate-200 transition-colors">Contact</Link>
-              <a href="https://github.com/ShunyaPulse/kanban-board" target="_blank" rel="noopener noreferrer" className="hover:text-slate-200 transition-colors">GitHub</a>
+              <a href="https://github.com/ShunyaPulse/kanban-cloud" target="_blank" rel="noopener noreferrer" className="hover:text-slate-200 transition-colors">GitHub</a>
             </nav>
           </div>
         </footer>
