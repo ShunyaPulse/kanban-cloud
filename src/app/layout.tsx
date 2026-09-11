@@ -77,7 +77,7 @@ export default function RootLayout({
 
         {/* Adsterra Social Bar */}
         <Script 
-          src="https://pl31292004.profitableratecpmnetwork.com/ec/e7/6c/ece76ca482e275898579d4ac5ad5f0d8.js" 
+          src="https://pl31292005.profitableratecpmnetwork.com/4d/f2/2a/4df22ae1cef161197a583041e1593cd0.js" 
           strategy="afterInteractive" 
         />
         
