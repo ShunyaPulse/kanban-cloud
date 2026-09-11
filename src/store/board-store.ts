@@ -135,7 +135,7 @@ export const useBoardStore = create<BoardState>()(
           metrics: calculateMetricsLocal(newColumns)
         }));
         
-        // Sync with API backend (zero-cost architecture)
+        // Sync with API backend (cloud-native persistence)
         fetch('/api/board', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

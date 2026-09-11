@@ -2,9 +2,9 @@ import { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Kanban Board',
-    short_name: 'Kanban',
-    description: 'Free online Kanban board for task management.',
+    name: 'Kanban Cloud',
+    short_name: 'Kanban Cloud',
+    description: 'Modern cloud-native Kanban platform for Agile task management.',
     start_url: '/',
     display: 'standalone',
     background_color: '#0f172a',

@@ -61,8 +61,8 @@ export default function Contact() {
 
             <div className="space-y-4 mt-4">
               <div className="bg-slate-800/40 border border-slate-700/40 rounded-xl p-4">
-                <h3 className="font-semibold text-slate-100 mb-1">Is Kanban Cloud free to use?</h3>
-                <p className="text-sm text-slate-400">Yes, Kanban Cloud is completely free and open source. There are no subscriptions or hidden charges.</p>
+                <h3 className="font-semibold text-slate-100 mb-1">Is Kanban Cloud open source?</h3>
+                <p className="text-sm text-slate-400">Yes, Kanban Cloud is an open-source productivity platform licensed under the MIT License. You can inspect the source code, contribute, or self-host your own instance.</p>
               </div>
               <div className="bg-slate-800/40 border border-slate-700/40 rounded-xl p-4">
                 <h3 className="font-semibold text-slate-100 mb-1">How is my board data preserved?</h3>

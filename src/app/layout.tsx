@@ -5,17 +5,17 @@ import Script from "next/script";
 
 export const metadata: Metadata = {
   title: {
-    default: "Kanban Board - Free Online Task Management Tool",
-    template: "%s | Kanban Board",
+    default: "Kanban Cloud - Modern Agile Task Management Platform",
+    template: "%s | Kanban Cloud",
   },
   description:
-    "Free online Kanban board for task management. Organize projects with drag-and-drop columns, track progress with real-time analytics, and boost your productivity. No sign-up required.",
+    "Modern cloud-native Kanban platform for Agile task management. Organize workflows with drag-and-drop columns, real-time analytics, WIP limits, and cloud persistence.",
   keywords: [
-    "kanban board",
+    "kanban cloud",
     "task management",
     "project management",
     "productivity tool",
-    "free kanban",
+    "cloud kanban",
     "drag and drop",
     "todo list",
     "agile board",
@@ -26,18 +26,18 @@ export const metadata: Metadata = {
   creator: "ShunyaPulse",
   publisher: "ShunyaPulse",
   openGraph: {
-    title: "Kanban Board - Free Online Task Management Tool",
+    title: "Kanban Cloud - Modern Agile Task Management Platform",
     description:
-      "Organize your projects with a beautiful drag-and-drop Kanban board. Track progress, manage WIP limits, and boost productivity — completely free.",
+      "Organize your projects with a beautiful drag-and-drop Kanban board. Track progress, manage WIP limits, and boost productivity with real-time cloud persistence.",
     type: "website",
     locale: "en_US",
-    siteName: "Kanban Board",
+    siteName: "Kanban Cloud",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Kanban Board - Free Online Task Management Tool",
+    title: "Kanban Cloud - Modern Agile Task Management Platform",
     description:
-      "Organize your projects with a beautiful drag-and-drop Kanban board. Completely free, no sign-up required.",
+      "Organize your projects with a beautiful drag-and-drop Kanban board with real-time metrics and cloud persistence.",
   },
   robots: {
     index: true,
