@@ -65,7 +65,7 @@ jobs:
         run: |
           # Lowercase the image name for GCP
           IMAGE=$(echo "ghcr.io/${{ env.IMAGE_NAME }}:latest" | tr '[:upper:]' '[:lower:]')
-          gcloud run deploy cloud-run-kanban \
+          gcloud run deploy kanban-cloud \
             --image=$IMAGE \
             --region=asia-south1 \
             --allow-unauthenticated \
