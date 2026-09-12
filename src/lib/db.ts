@@ -1,4 +1,4 @@
-﻿import { Pool } from "pg";
+import { Pool } from "pg";
 
 let pool: Pool | null = null;
 
@@ -69,5 +69,7 @@ export async function initDb() {
       data JSONB NOT NULL,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
+
+    ALTER TABLE boards ADD COLUMN IF NOT EXISTS user_id INTEGER REFERENCES users(id) ON DELETE CASCADE;
   `);
 }
