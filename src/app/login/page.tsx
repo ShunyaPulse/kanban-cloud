@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { signIn } from "next-auth/react";
 import { useState } from "react";
@@ -25,7 +25,7 @@ export default function LoginPage() {
       });
 
       if (res?.error) {
-        setError("Invalid email or password");
+        setError(res.error === "CredentialsSignin" ? "Invalid email or password" : res.error);
       } else {
         router.push("/");
         router.refresh();

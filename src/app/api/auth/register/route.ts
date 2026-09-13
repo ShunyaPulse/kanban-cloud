@@ -1,20 +1,35 @@
-﻿import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getDb, initDb } from '@/lib/db';
+import { rateLimit, getClientIp } from '@/lib/ratelimit';
 import bcrypt from 'bcryptjs';
 
 export async function POST(req: Request) {
   try {
+    const ip = getClientIp(req.headers);
+
+    // Rate Limit: Max 5 registrations per IP per 15 minutes (900 seconds)
+    const { success, resetInSeconds } = await rateLimit(`rate:register:${ip}`, 5, 900);
+    if (!success) {
+      const minutes = Math.ceil(resetInSeconds / 60);
+      return NextResponse.json(
+        { error: `Too many sign-up attempts. Please try again in ${minutes} minute(s).` },
+        { status: 429 }
+      );
+    }
+
     const { name, email, password } = await req.json();
 
     if (!email || !password) {
       return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
     }
 
+    const cleanEmail = email.trim().toLowerCase();
+
     await initDb();
     const db = getDb();
 
-    // Check if user exists
-    const existing = await db.query('SELECT id FROM users WHERE email = $1', [email]);
+    // Check if user exists (case-insensitive)
+    const existing = await db.query('SELECT id FROM users WHERE LOWER(TRIM(email)) = $1', [cleanEmail]);
     if (existing.rows.length > 0) {
       return NextResponse.json({ error: 'User already exists' }, { status: 400 });
     }
