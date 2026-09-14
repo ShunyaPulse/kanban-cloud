@@ -6,7 +6,8 @@ export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
   const challenge = generateShieldChallenge();
-  const res = NextResponse.json(challenge);
+  const turnstileSiteKey = process.env.CLOUDFLARE_TURNSTILE_SITE_KEY || process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY || "";
+  const res = NextResponse.json({ ...challenge, turnstileSiteKey });
 
   // Set device fingerprint cookie if not present
   const cookiesHeader = req.headers.get("cookie") || "";

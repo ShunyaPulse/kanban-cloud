@@ -34,19 +34,45 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState("");
+  const [turnstileSiteKey, setTurnstileSiteKey] = useState(process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY || "");
   const turnstileContainerRef = useRef<HTMLDivElement>(null);
 
-  const turnstileSiteKey = process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY;
+  // Fetch runtime challenge and Turnstile key
+  useEffect(() => {
+    fetch("/api/auth/shield")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.turnstileSiteKey) {
+          setTurnstileSiteKey(data.turnstileSiteKey);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Initialize Cloudflare Turnstile if site key is configured
   useEffect(() => {
-    if (!isLogin && turnstileSiteKey && typeof window !== "undefined" && (window as any).turnstile) {
-      if (turnstileContainerRef.current) {
-        turnstileContainerRef.current.innerHTML = "";
-        (window as any).turnstile.render(turnstileContainerRef.current, {
-          sitekey: turnstileSiteKey,
-          callback: (token: string) => setTurnstileToken(token),
-        });
+    if (!isLogin && turnstileSiteKey && typeof window !== "undefined") {
+      const renderWidget = () => {
+        if ((window as any).turnstile && turnstileContainerRef.current) {
+          turnstileContainerRef.current.innerHTML = "";
+          (window as any).turnstile.render(turnstileContainerRef.current, {
+            sitekey: turnstileSiteKey,
+            theme: "dark",
+            callback: (token: string) => setTurnstileToken(token),
+          });
+        }
+      };
+
+      if ((window as any).turnstile) {
+        renderWidget();
+      } else {
+        const interval = setInterval(() => {
+          if ((window as any).turnstile) {
+            clearInterval(interval);
+            renderWidget();
+          }
+        }, 300);
+        return () => clearInterval(interval);
       }
     }
   }, [isLogin, turnstileSiteKey]);
