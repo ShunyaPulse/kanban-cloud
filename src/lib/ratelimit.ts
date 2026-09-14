@@ -60,3 +60,23 @@ export function getClientIp(headers: Headers | Record<string, string | string[] 
   }
   return "unknown-ip";
 }
+
+/**
+ * Extracts the Subnet / Prefix of the IP
+ * IPv6: /48 prefix (first 3 segments) e.g., 2402:3a80:159::
+ * IPv4: /24 subnet (first 3 octets) e.g., 112.79.12.0
+ * Kills mobile flight-mode dynamic IP rotation!
+ */
+export function getClientSubnet(ip: string): string {
+  if (!ip || ip === "unknown-ip" || ip === "127.0.0.1") return ip;
+
+  if (ip.includes(":")) {
+    const parts = ip.split(":");
+    return parts.slice(0, 3).join(":") + "::/48";
+  } else if (ip.includes(".")) {
+    const parts = ip.split(".");
+    return parts.slice(0, 3).join(".") + ".0/24";
+  }
+  return ip;
+}
+

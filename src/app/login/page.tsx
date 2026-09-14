@@ -1,9 +1,28 @@
 "use client";
 
 import { signIn } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Script from "next/script";
+
+// Client-side WebCrypto Proof-of-Work solver (~30ms in real browsers, impossible for raw bots)
+async function solveShieldPoW(salt: string, difficulty: number): Promise<string> {
+  const prefix = "0".repeat(difficulty);
+  let nonce = 0;
+  while (nonce < 100000) {
+    const text = `${salt}:${nonce}`;
+    const msgBuffer = new TextEncoder().encode(text);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+    if (hashHex.startsWith(prefix)) {
+      return nonce.toString();
+    }
+    nonce++;
+  }
+  return nonce.toString();
+}
 
 export default function LoginPage() {
   const router = useRouter();
@@ -11,45 +30,89 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [hpWebsite, setHpWebsite] = useState(""); // Honeypot trap
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const turnstileContainerRef = useRef<HTMLDivElement>(null);
+
+  const turnstileSiteKey = process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY;
+
+  // Initialize Cloudflare Turnstile if site key is configured
+  useEffect(() => {
+    if (!isLogin && turnstileSiteKey && typeof window !== "undefined" && (window as any).turnstile) {
+      if (turnstileContainerRef.current) {
+        turnstileContainerRef.current.innerHTML = "";
+        (window as any).turnstile.render(turnstileContainerRef.current, {
+          sitekey: turnstileSiteKey,
+          callback: (token: string) => setTurnstileToken(token),
+        });
+      }
+    }
+  }, [isLogin, turnstileSiteKey]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setIsSubmitting(true);
 
-    if (isLogin) {
-      const res = await signIn("credentials", {
-        redirect: false,
-        email,
-        password,
-      });
+    try {
+      if (isLogin) {
+        const res = await signIn("credentials", {
+          redirect: false,
+          email,
+          password,
+        });
 
-      if (res?.error) {
-        setError(res.error === "CredentialsSignin" ? "Invalid email or password" : res.error);
+        if (res?.error) {
+          setError(res.error === "CredentialsSignin" ? "Invalid email or password" : res.error);
+        } else {
+          router.push("/");
+          router.refresh();
+        }
       } else {
-        router.push("/");
-        router.refresh();
-      }
-    } else {
-      // Register
-      try {
+        // Register: Solve browser anti-bot challenge
+        let shieldPayload = null;
+        try {
+          const challengeRes = await fetch("/api/auth/shield");
+          if (challengeRes.ok) {
+            const challenge = await challengeRes.json();
+            const solution = await solveShieldPoW(challenge.salt, challenge.targetDifficulty);
+            shieldPayload = { ...challenge, solution };
+          }
+        } catch (shieldErr) {
+          console.warn("Shield solver warning:", shieldErr);
+        }
+
         const res = await fetch("/api/auth/register", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, email, password }),
+          body: JSON.stringify({
+            name,
+            email,
+            password,
+            hp_website: hpWebsite,
+            shield: shieldPayload,
+            turnstileToken,
+          }),
         });
+
         const data = await res.json();
         if (!res.ok) {
           setError(data.error || "Registration failed");
+          setIsSubmitting(false);
           return;
         }
+
         // Auto sign in
         await signIn("credentials", { redirect: false, email, password });
         router.push("/");
         router.refresh();
-      } catch (err) {
-        setError("Something went wrong");
       }
+    } catch (err) {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -128,13 +191,33 @@ export default function LoginPage() {
               placeholder="••••••••"
             />
           </div>
+          {/* Invisible honeypot trap for bots */}
+          <input
+            type="text"
+            name="hp_website"
+            value={hpWebsite}
+            onChange={(e) => setHpWebsite(e.target.value)}
+            tabIndex={-1}
+            autoComplete="off"
+            style={{ display: "none", position: "absolute", left: "-9999px" }}
+          />
+
+          {!isLogin && turnstileSiteKey && (
+            <div ref={turnstileContainerRef} className="my-3 flex justify-center min-h-[65px]" />
+          )}
+
           <button
             type="submit"
-            className="w-full bg-gradient-to-r from-blue-500 to-emerald-500 hover:from-blue-600 hover:to-emerald-600 text-white py-3 rounded-lg font-medium transition-all shadow-lg shadow-blue-500/25"
+            disabled={isSubmitting}
+            className="w-full bg-gradient-to-r from-blue-500 to-emerald-500 hover:from-blue-600 hover:to-emerald-600 disabled:opacity-50 text-white py-3 rounded-lg font-medium transition-all shadow-lg shadow-blue-500/25"
           >
-            {isLogin ? "Sign In" : "Create Account"}
+            {isSubmitting ? "Verifying..." : isLogin ? "Sign In" : "Create Account"}
           </button>
         </form>
+
+        {turnstileSiteKey && (
+          <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" strategy="lazyOnload" />
+        )}
 
         <p className="mt-6 text-center text-slate-400 text-sm">
           {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
