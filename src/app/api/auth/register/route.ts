@@ -112,6 +112,11 @@ export async function POST(req: Request) {
       );
     }
 
+    const commonPasswords = ["password", "12345678", "qwertyuiop", "11111111", "kanbancloud"];
+    if (commonPasswords.includes(password.toLowerCase()) || password.toLowerCase() === cleanEmail) {
+      return NextResponse.json({ error: "Password is too weak or common" }, { status: 400 });
+    }
+
     // Sanitize Name (prevent XSS)
     const cleanName = (name || cleanEmail.split('@')[0])
       .replace(/<[^>]*>/g, '')

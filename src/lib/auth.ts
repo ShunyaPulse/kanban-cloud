@@ -46,13 +46,12 @@ export const authOptions: NextAuthOptions = {
         const res = await db.query('SELECT * FROM users WHERE LOWER(TRIM(email)) = $1', [cleanEmail]);
         const user = res.rows[0];
 
-        if (!user || !user.password) {
-          return null;
-        }
+        // Timing-attack defense: always run bcrypt comparison to make response times identical
+        const dummyHash = "$2a$10$wE9s4Wk8hYJ7JqBqT.1gI.yZ8s1s2s3s4s5s6s7s8s9s0s1s2s3s4";
+        const passwordToCompare = user?.password || dummyHash;
+        const isValid = await bcrypt.compare(credentials.password, passwordToCompare);
 
-        const isValid = await bcrypt.compare(credentials.password, user.password);
-
-        if (!isValid) {
+        if (!user || !user.password || !isValid) {
           return null;
         }
 
@@ -68,6 +67,7 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt"
   },
+  useSecureCookies: process.env.NODE_ENV === "production",
   pages: {
     signIn: '/login',
   },
