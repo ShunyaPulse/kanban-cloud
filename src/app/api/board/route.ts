@@ -1,4 +1,4 @@
-﻿import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getDb, initDb } from '@/lib/db';
 import { getCache } from '@/lib/cache';
 import { getServerSession } from "next-auth/next";
@@ -60,7 +60,20 @@ export async function POST(req: Request) {
     const userId = (session.user as any).id;
     const boardId = `user-board-${userId}`;
 
-    const data = await req.json();
+    // CSRF / Origin Verification
+    const origin = req.headers.get('origin') || req.headers.get('referer');
+    const host = req.headers.get('host');
+    if (origin && host && !origin.includes(host)) {
+      return NextResponse.json({ error: 'Invalid request origin' }, { status: 403 });
+    }
+
+    const bodyText = await req.text();
+    // Payload Size Limit: Max 1MB
+    if (bodyText.length > 1024 * 1024) {
+      return NextResponse.json({ error: 'Payload too large (max 1MB)' }, { status: 413 });
+    }
+
+    const data = JSON.parse(bodyText);
     await initDb();
     
     const db = getDb();

@@ -88,11 +88,35 @@ export async function POST(req: Request) {
       );
     }
 
+    // Layer 7: CSRF / Origin Verification
+    const origin = req.headers.get('origin') || req.headers.get('referer');
+    const host = req.headers.get('host');
+    if (origin && host && !origin.includes(host)) {
+      return NextResponse.json({ error: 'Invalid request origin' }, { status: 403 });
+    }
+
     if (!email || !password) {
       return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
     }
 
     const cleanEmail = email.trim().toLowerCase();
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(cleanEmail) || cleanEmail.length > 100) {
+      return NextResponse.json({ error: 'Invalid email address format' }, { status: 400 });
+    }
+
+    if (password.length < 8 || password.length > 72) {
+      return NextResponse.json(
+        { error: 'Password must be between 8 and 72 characters' },
+        { status: 400 }
+      );
+    }
+
+    // Sanitize Name (prevent XSS)
+    const cleanName = (name || cleanEmail.split('@')[0])
+      .replace(/<[^>]*>/g, '')
+      .trim()
+      .slice(0, 50);
 
     await initDb();
     const db = getDb();
@@ -107,7 +131,7 @@ export async function POST(req: Request) {
 
     const result = await db.query(
       'INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING id, name, email',
-      [name || email.split('@')[0], email, hashedPassword]
+      [cleanName, cleanEmail, hashedPassword]
     );
 
     return NextResponse.json({ success: true, user: result.rows[0] });
