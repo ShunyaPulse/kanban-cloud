@@ -1,11 +1,11 @@
 # ☁️ Kanban Cloud
 
-A production-grade, highly resilient full-stack Kanban board powered by a **Zero-Cost Serverless Architecture**. 
+A production-grade, highly resilient full-stack Kanban platform powered by modern Cloud-Native Architecture. 
 
 ![Kanban UI](https://img.shields.io/badge/UI-Next.js-black?logo=next.js)
 ![Cloud Run](https://img.shields.io/badge/Compute-Google_Cloud_Run-4285F4?logo=googlecloud)
 ![Neon](https://img.shields.io/badge/Database-Neon_Serverless_Postgres-00E599?logo=postgresql)
-![Redis](https://img.shields.io/badge/Cache-Oracle_VM_+_Redis-DC382D?logo=redis)
+![Redis](https://img.shields.io/badge/Cache-Distributed_Redis-DC382D?logo=redis)
 
 ## 🚀 Live Demo
 **[Play with the Live App here!](https://kanban-cloud-685823552970.asia-south1.run.app)**
@@ -28,13 +28,13 @@ This isn't just a basic to-do list; it's a fully featured Agile project manageme
 
 ## 🏗 Architecture Overview
 
-While the UI is beautiful, the backend is built like a tech giant—all while keeping monthly costs at **$0.00**.
+Built with an enterprise-grade, cloud-native stack designed for high availability, low latency, and automated scalability:
 
 1. **Frontend & Backend Unified**: Built with Next.js App Router. The UI logic is client-side, while the API logic lives securely in Node.js routes (`/api/board`).
-2. **Containerized Compute**: Deployed to **Google Cloud Run** using a highly optimized Docker image. It aggressively scales to zero when idle to conserve resources.
-3. **Serverless Database**: Data is stored securely in **Neon Serverless Postgres**.
-4. **Resilient Caching**: Powered by a free-tier **Oracle Cloud VM running Redis**. The codebase implements *graceful degradation*—meaning if the Redis cache is unreachable, the app seamlessly falls back to Postgres without crashing.
-5. **GitOps Automation**: Fully automated CI/CD pipeline. Pushing to `main` triggers GitHub Actions to build the container and deploy to Google Cloud automatically.
+2. **Containerized Compute**: Deployed to **Google Cloud Run** using a highly optimized, multi-stage Docker image with dynamic auto-scaling.
+3. **Serverless Database**: Data is persisted securely in **Neon Serverless Postgres** with connection pooling.
+4. **Resilient Caching Layer**: Powered by a dedicated **Redis cache**. The codebase implements *graceful degradation*—meaning if the Redis cache is unreachable, the app seamlessly falls back to Postgres without crashing.
+5. **GitOps Automation**: Fully automated CI/CD pipeline. Pushing to `main` triggers GitHub Actions to build the container, push to GHCR, and deploy to Google Cloud automatically.
 
 ---
 

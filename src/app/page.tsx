@@ -23,7 +23,7 @@ export default function Home() {
       <header className="glass-header px-4 sm:px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0 z-10 shrink-0 sticky top-0">
         <div className="flex items-center justify-between w-full sm:w-auto">
           <h1 className="text-xl font-bold text-slate-100 tracking-tight mr-4 sm:mr-6">
-            Kanban
+            Kanban Cloud
           </h1>
           <UndoRedoControls />
         </div>

@@ -73,7 +73,7 @@ export default function About() {
               <li><strong className="text-slate-100">Frontend & API Engine:</strong> Next.js App Router with TypeScript & standalone Node.js runtime</li>
               <li><strong className="text-slate-100">Styling & Design System:</strong> Tailwind CSS dark theme with responsive glassmorphism</li>
               <li><strong className="text-slate-100">State Management:</strong> Zustand store with optimistic updates and background API synchronization</li>
-              <li><strong className="text-slate-100">Cloud Compute:</strong> Google Cloud Run containerized deployment (scales from 0 to N with zero idle cost)</li>
+              <li><strong className="text-slate-100">Cloud Compute:</strong> Google Cloud Run containerized deployment with dynamic auto-scaling and high availability</li>
               <li><strong className="text-slate-100">Database:</strong> Neon Serverless PostgreSQL with SSL connection pooling</li>
               <li><strong className="text-slate-100">Caching Layer:</strong> In-memory Redis cache hosted with automatic fallback and graceful degradation</li>
               <li><strong className="text-slate-100">CI/CD Pipeline:</strong> Automated GitHub Actions workflow pushing to GitHub Container Registry (GHCR)</li>
