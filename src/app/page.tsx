@@ -8,8 +8,18 @@ import UndoRedoControls from "@/components/UndoRedoControls";
 import ImportExport from "@/components/ImportExport";
 import InstallPwaButton from "@/components/InstallPwaButton";
 import { useBoardStore } from "@/store/board-store";
+import { useSession, signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login');
+    }
+  }, [status, router]);
   const toggleMetrics = useBoardStore((s) => s.toggleMetrics);
   const fetchBoard = useBoardStore((s) => s.fetchBoard);
 
@@ -31,12 +41,34 @@ export default function Home() {
           <InstallPwaButton />
           <button
             onClick={toggleMetrics}
-            className="px-4 py-2 text-sm font-semibold text-slate-200 bg-slate-800/80 border border-slate-700/60 rounded-xl hover:bg-slate-700 transition-all shadow-sm backdrop-blur-sm"
+            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-200 bg-slate-800/80 border border-slate-700/60 rounded-xl hover:bg-slate-700 transition-all shadow-sm backdrop-blur-sm"
           >
-            📊 Metrics
+            <svg className="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            <span>Metrics</span>
           </button>
           <div className="h-6 w-px bg-slate-700 hidden sm:block"></div>
           <ImportExport />
+          {session?.user && (
+            <>
+              <div className="w-px h-6 bg-slate-700/50 mx-1 hidden sm:block"></div>
+              <div className="flex items-center gap-3 pl-2">
+                <div className="flex flex-col items-end hidden sm:flex">
+                  <span className="text-sm font-medium text-slate-200">{session.user.name}</span>
+                  <button onClick={() => signOut()} className="text-xs text-slate-400 hover:text-red-400 transition-colors">Logout</button>
+                </div>
+                {session.user.image ? (
+                  <img src={session.user.image} alt="Profile" className="w-8 h-8 rounded-full border border-slate-600" />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-blue-500/20 border border-blue-500/50 flex items-center justify-center text-blue-400 font-bold text-sm">
+                    {session.user.name?.charAt(0).toUpperCase() || 'U'}
+                  </div>
+                )}
+                <button onClick={() => signOut()} className="sm:hidden text-xs bg-slate-800 border border-slate-700 text-slate-300 px-2 py-1 rounded">Logout</button>
+              </div>
+            </>
+          )}
           <a
             href="https://github.com/ShunyaPulse/kanban-cloud"
             target="_blank"
@@ -57,3 +89,7 @@ export default function Home() {
     </main>
   );
 }
+
+
+
+

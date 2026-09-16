@@ -1,18 +1,26 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import { getDb, initDb } from '@/lib/db';
 import { getCache } from '@/lib/cache';
-
-const BOARD_ID = 'main-board';
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
 
 export async function GET() {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user || !(session.user as any).id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const userId = (session.user as any).id;
+    const boardId = `user-board-${userId}`;
+
     await initDb();
     
     // Try Cache First
     const { redis, cacheEnabled } = getCache();
     if (cacheEnabled && redis) {
       try {
-        const cachedData = await redis.get(`board:${BOARD_ID}`);
+        const cachedData = await redis.get(`board:${boardId}`);
         if (cachedData) {
           return NextResponse.json(JSON.parse(cachedData));
         }
@@ -23,13 +31,13 @@ export async function GET() {
 
     // Fallback to DB
     const db = getDb();
-    const result = await db.query('SELECT data FROM boards WHERE id = $1', [BOARD_ID]);
+    const result = await db.query('SELECT data FROM boards WHERE id = $1 AND user_id = $2', [boardId, userId]);
     
     if (result.rows.length > 0) {
       const data = result.rows[0].data;
       // Sync cache
       if (cacheEnabled && redis) {
-        redis.set(`board:${BOARD_ID}`, JSON.stringify(data), 'EX', 3600).catch(() => {});
+        redis.set(`board:${boardId}`, JSON.stringify(data), 'EX', 3600).catch(() => {});
       }
       return NextResponse.json(data);
     }
@@ -44,21 +52,29 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user || !(session.user as any).id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const userId = (session.user as any).id;
+    const boardId = `user-board-${userId}`;
+
     const data = await req.json();
     await initDb();
     
     const db = getDb();
     await db.query(
-      `INSERT INTO boards (id, data, updated_at) 
-       VALUES ($1, $2, CURRENT_TIMESTAMP) 
-       ON CONFLICT (id) DO UPDATE SET data = $2, updated_at = CURRENT_TIMESTAMP`,
-      [BOARD_ID, JSON.stringify(data)]
+      `INSERT INTO boards (id, user_id, data, updated_at) 
+       VALUES ($1, $2, $3, CURRENT_TIMESTAMP) 
+       ON CONFLICT (id) DO UPDATE SET data = $3, updated_at = CURRENT_TIMESTAMP`,
+      [boardId, userId, JSON.stringify(data)]
     );
 
     // Update Cache
     const { redis, cacheEnabled } = getCache();
     if (cacheEnabled && redis) {
-      redis.set(`board:${BOARD_ID}`, JSON.stringify(data), 'EX', 3600).catch(() => {});
+      redis.set(`board:${boardId}`, JSON.stringify(data), 'EX', 3600).catch(() => {});
     }
 
     return NextResponse.json({ success: true });
