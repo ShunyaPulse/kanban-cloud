@@ -151,7 +151,8 @@ export const useBoardStore = create<BoardState>()(
           if (data && Array.isArray(data) && data.length > 0) {
             set({ columns: data, metrics: calculateMetricsLocal(data) });
           } else {
-            set({ metrics: calculateMetricsLocal(get().columns) });
+            // New user or empty DB: reset to default columns to wipe any previous user's localStorage cache
+            set({ columns: defaultColumns, metrics: calculateMetricsLocal(defaultColumns) });
           }
         } catch (err) {
           console.error("Failed to fetch from Cloud Run API:", err);
