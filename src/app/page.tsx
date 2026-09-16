@@ -7,6 +7,7 @@ import CardModal from "@/components/CardModal";
 import UndoRedoControls from "@/components/UndoRedoControls";
 import ImportExport from "@/components/ImportExport";
 import InstallPwaButton from "@/components/InstallPwaButton";
+import { TwoFactorModal } from "@/components/two-factor-modal";
 import { useBoardStore } from "@/store/board-store";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -14,19 +15,21 @@ import { useRouter } from "next/navigation";
 export default function Home() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const [show2FAModal, setShow2FAModal] = React.useState(false);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/login');
+    } else if (status === 'authenticated' && session?.user && (session.user as any).needs2FA) {
+      router.push('/login?2fa=required');
     }
-  }, [status, router]);
+  }, [status, session, router]);
   const toggleMetrics = useBoardStore((s) => s.toggleMetrics);
   const fetchBoard = useBoardStore((s) => s.fetchBoard);
 
   useEffect(() => {
     fetchBoard();
   }, [fetchBoard]);
-
 
   return (
     <main className="flex-1 flex flex-col font-sans overflow-hidden bg-transparent">
@@ -53,6 +56,16 @@ export default function Home() {
           {session?.user && (
             <>
               <div className="w-px h-6 bg-slate-700/50 mx-1 hidden sm:block"></div>
+              <button
+                onClick={() => setShow2FAModal(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-emerald-400 bg-emerald-950/50 border border-emerald-700/60 rounded-xl hover:bg-emerald-900/60 transition-all shadow-sm backdrop-blur-sm"
+                title="Manage 2FA Two-Factor Authentication"
+              >
+                <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+                <span className="hidden md:inline">2FA Security</span>
+              </button>
               <div className="flex items-center gap-3 pl-2">
                 <div className="flex flex-col items-end hidden sm:flex">
                   <span className="text-sm font-medium text-slate-200">{session.user.name}</span>
@@ -86,10 +99,7 @@ export default function Home() {
       <Board />
       <MetricsPanel />
       <CardModal />
+      <TwoFactorModal isOpen={show2FAModal} onClose={() => setShow2FAModal(false)} />
     </main>
   );
 }
-
-
-
-

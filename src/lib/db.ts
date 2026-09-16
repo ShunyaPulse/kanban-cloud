@@ -71,5 +71,18 @@ export async function initDb() {
     );
 
     ALTER TABLE boards ADD COLUMN IF NOT EXISTS user_id INTEGER REFERENCES users(id) ON DELETE CASCADE;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS two_factor_secret TEXT;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS two_factor_enabled BOOLEAN DEFAULT FALSE;
+
+    CREATE TABLE IF NOT EXISTS email_otps (
+      email VARCHAR(255) PRIMARY KEY,
+      otp VARCHAR(10) NOT NULL,
+      attempts INTEGER DEFAULT 0,
+      expires_at TIMESTAMPTZ NOT NULL,
+      used_at TIMESTAMPTZ,
+      created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+    );
+
+    ALTER TABLE email_otps ADD COLUMN IF NOT EXISTS used_at TIMESTAMPTZ;
   `);
 }
