@@ -19,8 +19,8 @@ export async function POST(req: Request) {
     }
 
     // Layer 2: Cloudflare Turnstile Verification (if enabled)
-    if (process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY) {
-      const isHuman = await verifyCloudflareTurnstile(turnstileToken || "", ip);
+    if (process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY && turnstileToken) {
+      const isHuman = await verifyCloudflareTurnstile(turnstileToken, ip);
       if (!isHuman) {
         return NextResponse.json(
           { error: "Security check failed. Please refresh and try again." },

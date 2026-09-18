@@ -120,6 +120,11 @@ export default function LoginPage() {
       return;
     }
 
+    if (!isLogin && turnstileSiteKey && !turnstileToken) {
+      setError("Please complete the Cloudflare security verification below first.");
+      return;
+    }
+
     setError("");
     setSuccessMsg("");
     setSendingOtp(true);
@@ -128,7 +133,11 @@ export default function LoginPage() {
       const res = await fetch("/api/auth/email-otp/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, purpose: isLogin ? "login" : "signup" }),
+        body: JSON.stringify({
+          email,
+          purpose: isLogin ? "login" : "signup",
+          turnstileToken: !isLogin ? turnstileToken : undefined,
+        }),
       });
       const data = await res.json();
 
@@ -137,6 +146,13 @@ export default function LoginPage() {
       } else {
         setOtpSent(true);
         setSuccessMsg("6-Digit verification code sent! Check your inbox.");
+        // Reset turnstile widget so user gets a fresh token for account creation
+        if ((window as any).turnstile && turnstileContainerRef.current) {
+          try {
+            (window as any).turnstile.reset(turnstileContainerRef.current);
+            setTurnstileToken("");
+          } catch {}
+        }
       }
     } catch {
       setError("Failed to send OTP email. Please try again.");
