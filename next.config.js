@@ -22,6 +22,7 @@ const cspHeader = `
 const nextConfig = {
   output: 'standalone',
   poweredByHeader: false,
+  turbopack: {},
   async headers() {
     return [
       {
