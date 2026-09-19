@@ -117,11 +117,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Password is too weak or common" }, { status: 400 });
     }
 
-    // Sanitize Name (prevent XSS)
-    const cleanName = (name || cleanEmail.split('@')[0])
-      .replace(/<[^>]*>/g, '')
-      .trim()
-      .slice(0, 50);
+    // Sanitize Name (prevent XSS) — encode HTML special chars instead of stripping tags,
+    // which fixes incomplete-multi-character-sanitization (CodeQL js/incomplete-multi-character-sanitization)
+    const rawName = (name || cleanEmail.split('@')[0]).trim().slice(0, 50);
+    const cleanName = rawName
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#x27;');
 
     await initDb();
     const db = getDb();

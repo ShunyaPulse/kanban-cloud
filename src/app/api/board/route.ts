@@ -102,15 +102,26 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid board schema format' }, { status: 400 });
     }
 
-    // Sanitize column and card string fields against stored XSS
+    // Sanitize column and card string fields against stored XSS.
+    // Use character-level HTML encoding (not tag-stripping) to fix
+    // incomplete-multi-character-sanitization (CodeQL js/incomplete-multi-character-sanitization)
+    function encodeHtml(str: string): string {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#x27;');
+    }
+
     const sanitizedData = data.map((col: any) => ({
       ...col,
-      title: String(col.title || '').replace(/<[^>]*>/g, '').slice(0, 100),
+      title: encodeHtml(String(col.title || '')).slice(0, 100),
       cards: Array.isArray(col.cards)
         ? col.cards.slice(0, 500).map((card: any) => ({
             ...card,
-            title: String(card.title || '').replace(/<[^>]*>/g, '').slice(0, 200),
-            description: String(card.description || '').replace(/<[^>]*>/g, '').slice(0, 2000),
+            title: encodeHtml(String(card.title || '')).slice(0, 200),
+            description: encodeHtml(String(card.description || '')).slice(0, 2000),
           }))
         : [],
     }));

@@ -60,7 +60,10 @@ export function verifyShieldSolution(
     .update(`${salt}:${solution}`)
     .digest("hex");
 
-  const prefix = "0".repeat(targetDifficulty);
+  // Clamp difficulty to a safe maximum to prevent resource exhaustion
+  // from a user-controlled targetDifficulty value (CodeQL js/resource-exhaustion)
+  const safeDifficulty = Math.min(Math.max(0, Math.floor(targetDifficulty)), 8);
+  const prefix = "0".repeat(safeDifficulty);
   return hash.startsWith(prefix);
 }
 
