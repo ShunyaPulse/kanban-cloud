@@ -31,6 +31,22 @@ export async function POST(req: Request) {
 
     // Layer 3: Anti-Bot Proof-of-Work Challenge (Stops Python, Curl, Headless scripts)
     if (shield) {
+      if (
+        typeof shield.salt !== "string" ||
+        typeof shield.timestamp !== "number" ||
+        typeof shield.targetDifficulty !== "number" ||
+        !Number.isInteger(shield.targetDifficulty) ||
+        shield.targetDifficulty < 1 ||
+        shield.targetDifficulty > 8 ||
+        typeof shield.signature !== "string" ||
+        typeof shield.solution !== "string"
+      ) {
+        return NextResponse.json(
+          { error: "Browser security challenge failed. Please refresh the page." },
+          { status: 403 }
+        );
+      }
+
       const isValidShield = verifyShieldSolution(
         shield.salt,
         shield.timestamp,

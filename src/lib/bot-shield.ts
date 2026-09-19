@@ -60,10 +60,20 @@ export function verifyShieldSolution(
     .update(`${salt}:${solution}`)
     .digest("hex");
 
-  // Clamp difficulty to a safe maximum to prevent resource exhaustion
-  // from a user-controlled targetDifficulty value (CodeQL js/resource-exhaustion)
-  const safeDifficulty = Math.min(Math.max(0, Math.floor(targetDifficulty)), 8);
-  const prefix = "0".repeat(safeDifficulty);
+  // Verify proof-of-work solution without String.prototype.repeat to prevent CodeQL js/resource-exhaustion
+  const PREFIX_TABLE: Record<number, string> = {
+    1: "0",
+    2: "00",
+    3: "000",
+    4: "0000",
+    5: "00000",
+    6: "000000",
+    7: "0000000",
+    8: "00000000",
+  };
+
+  const prefix = PREFIX_TABLE[targetDifficulty];
+  if (!prefix) return false;
   return hash.startsWith(prefix);
 }
 
