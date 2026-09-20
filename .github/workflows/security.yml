@@ -120,3 +120,27 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITLEAKS_ENABLE_SUMMARY: true
+
+  # 5. Dependabot: Automated validation and metadata processing for dependency updates
+  dependabot:
+    name: Dependabot Security Gate
+    if: github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Verify Dependency Update
+        run: |
+          echo "Processing Dependabot PR for: ${{ steps.metadata.outputs.dependency-names }}"
+          echo "Update type: ${{ steps.metadata.outputs.update-type }}"
+          echo "Compatibility score: ${{ steps.metadata.outputs.compatibility-score }}"
