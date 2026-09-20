@@ -8,12 +8,29 @@ updates:
       day: "monday"
       time: "06:00"
       timezone: "Asia/Kolkata"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
     labels:
       - "dependencies"
       - "npm"
     commit-message:
       prefix: "chore(deps)"
+    groups:
+      dev-dependencies:
+        patterns:
+          - "@testing-library/*"
+          - "@types/*"
+          - "eslint*"
+          - "prettier"
+          - "vitest*"
+          - "jsdom"
+          - "autoprefixer"
+      npm-dependencies:
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "next"
+          - "react"
+          - "react-dom"
 
   # Automated dependency updates for GitHub Actions workflows
   - package-ecosystem: "github-actions"
@@ -23,9 +40,16 @@ updates:
       day: "monday"
       time: "06:00"
       timezone: "Asia/Kolkata"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
     labels:
       - "dependencies"
       - "github-actions"
     commit-message:
       prefix: "chore(ci)"
+    groups:
+      codeql-actions:
+        patterns:
+          - "github/codeql-action/*"
+      github-actions:
+        patterns:
+          - "*"
