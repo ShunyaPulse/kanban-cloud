@@ -91,7 +91,13 @@ export default function RootLayout({
           src="https://pl31292004.profitableratecpmnetwork.com/ec/e7/6c/ece76ca482e275898579d4ac5ad5f0d8.js" 
           strategy="afterInteractive" 
         />
-              </Providers>
+
+        {/* Custom Widget */}
+        <Script 
+          src="http://34.56.134.20:8080/widget.js" 
+          strategy="afterInteractive" 
+        />
+      </Providers>
       </body>
     </html>
   );
