@@ -11,6 +11,7 @@ always_on: true
 
 2. **Dependabot Configuration Standards**:
    - Always configure `cooldown: default-days: 7` in `.github/dependabot.yml` to satisfy Semgrep supply-chain security rules.
+   - Ignore `semver-minor` and `semver-patch` updates globally (`dependency-name: "*"`) to prevent noisy routine PRs; Dependabot will only open PRs for critical/high security advisories and permitted version bumps.
    - Group `github/codeql-action/*` together under a single group in `dependabot.yml` so they are updated in lockstep.
    - Ignore major breaking updates for framework dependencies (`react`, `react-dom`, `tailwindcss`, `zod`) unless explicitly requested.
 
