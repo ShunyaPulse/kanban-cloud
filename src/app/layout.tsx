@@ -80,6 +80,18 @@ export default function RootLayout({
           </div>
         </footer>
 
+        </Providers>
+
+        {/* Cloudflare Edge Agent Widget */}
+        <Script
+          src="https://edge-agent-widget.shunopsai.workers.dev/widget.js"
+          data-api-url="https://edge-agent-widget.shunopsai.workers.dev"
+          data-title="Kanban Cloud AI"
+          data-welcome="Hi! I am your Kanban Cloud AI Assistant. I can help create tasks, summarize sprint WIP limits, highlight blockers, and configure board automation. How can I assist you?"
+          data-chips='[{"label":"➕ Create Task","prompt":"Create a new task card on the board"},{"label":"📊 Sprint WIP Status","prompt":"Summarize active board columns and WIP limits"},{"label":"🔍 Find Blockers","prompt":"Show blocked cards and urgent priority tasks"},{"label":"⚡ Board Automations","prompt":"How do I configure automation rules or export board data?"}]'
+          strategy="afterInteractive"
+        />
+
         {/* Adsterra Social Bar */}
         <Script 
           src="https://pl31292005.profitableratecpmnetwork.com/4d/f2/2a/4df22ae1cef161197a583041e1593cd0.js" 
@@ -91,17 +103,6 @@ export default function RootLayout({
           src="https://pl31292004.profitableratecpmnetwork.com/ec/e7/6c/ece76ca482e275898579d4ac5ad5f0d8.js" 
           strategy="afterInteractive" 
         />
-
-        {/* Cloudflare Edge Agent Widget */}
-        <Script
-          src="https://edge-agent-widget.shunopsai.workers.dev/widget.js"
-          data-api-url="https://edge-agent-widget.shunopsai.workers.dev"
-          data-title="Kanban Cloud AI"
-          data-welcome="Hi! I am your Kanban Cloud AI Assistant. I can help create tasks, summarize sprint WIP limits, highlight blockers, and configure board automation. How can I assist you?"
-          data-chips='[{"label":"➕ Create Task","prompt":"Create a new task card on the board"},{"label":"📊 Sprint WIP Status","prompt":"Summarize active board columns and WIP limits"},{"label":"🔍 Find Blockers","prompt":"Show blocked cards and urgent priority tasks"},{"label":"⚡ Board Automations","prompt":"How do I configure automation rules or export board data?"}]'
-          strategy="afterInteractive"
-        />
-      </Providers>
       </body>
     </html>
   );

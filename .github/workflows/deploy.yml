@@ -72,3 +72,6 @@ jobs:
             --allow-unauthenticated \
             --max-instances=2 \
             --min-instances=0
+          gcloud run services update-traffic kanban-cloud \
+            --region=asia-south1 \
+            --to-latest

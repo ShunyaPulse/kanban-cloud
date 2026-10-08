@@ -23,6 +23,9 @@ export default withAuth(
         return true;
       },
     },
+    pages: {
+      signIn: "/login",
+    },
   }
 );
 
