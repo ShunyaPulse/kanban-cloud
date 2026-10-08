@@ -7,11 +7,11 @@ const withPWA = require('@ducanh2912/next-pwa').default({
 
 const cspHeader = `
   default-src 'self';
-  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://*.profitableratecpmnetwork.com https://*.alwingulla.com https://*.adsterra.com;
+  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://edge-agent-widget.shunopsai.workers.dev https://*.profitableratecpmnetwork.com https://*.alwingulla.com https://*.adsterra.com;
   style-src 'self' 'unsafe-inline';
   img-src 'self' data: https: blob:;
   font-src 'self' data:;
-  connect-src 'self' https://challenges.cloudflare.com https://*.profitableratecpmnetwork.com https://*.adsterra.com;
+  connect-src 'self' https://challenges.cloudflare.com https://edge-agent-widget.shunopsai.workers.dev https://*.profitableratecpmnetwork.com https://*.adsterra.com;
   frame-src 'self' https://challenges.cloudflare.com https://*.profitableratecpmnetwork.com;
   object-src 'none';
   base-uri 'self';
