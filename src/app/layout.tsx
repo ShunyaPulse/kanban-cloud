@@ -92,10 +92,13 @@ export default function RootLayout({
           strategy="afterInteractive" 
         />
 
-        {/* Custom Widget */}
-        <Script 
-          src="http://34.56.134.20:8080/widget.js" 
-          strategy="afterInteractive" 
+        {/* Cloudflare Edge Agent Widget */}
+        <Script
+          src="https://edge-agent-widget.shunopsai.workers.dev/widget.js"
+          data-api-url="https://edge-agent-widget.shunopsai.workers.dev"
+          data-title="Kanban Cloud AI Assistant"
+          data-welcome="Hi! I am your Kanban Cloud Agile assistant. How can I help you manage your tasks today?"
+          strategy="lazyOnload"
         />
       </Providers>
       </body>
