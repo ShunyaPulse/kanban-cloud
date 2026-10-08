@@ -98,7 +98,7 @@ export default function RootLayout({
           data-api-url="https://edge-agent-widget.shunopsai.workers.dev"
           data-title="Kanban Cloud AI Assistant"
           data-welcome="Hi! I am your Kanban Cloud Agile assistant. How can I help you manage your tasks today?"
-          strategy="lazyOnload"
+          strategy="afterInteractive"
         />
       </Providers>
       </body>
