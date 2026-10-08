@@ -96,8 +96,9 @@ export default function RootLayout({
         <Script
           src="https://edge-agent-widget.shunopsai.workers.dev/widget.js"
           data-api-url="https://edge-agent-widget.shunopsai.workers.dev"
-          data-title="Kanban Cloud AI Assistant"
-          data-welcome="Hi! I am your Kanban Cloud Agile assistant. How can I help you manage your tasks today?"
+          data-title="Kanban Cloud AI"
+          data-welcome="Hi! I am your Kanban Cloud AI Assistant. I can help create tasks, summarize sprint WIP limits, highlight blockers, and configure board automation. How can I assist you?"
+          data-chips='[{"label":"➕ Create Task","prompt":"Create a new task card on the board"},{"label":"📊 Sprint WIP Status","prompt":"Summarize active board columns and WIP limits"},{"label":"🔍 Find Blockers","prompt":"Show blocked cards and urgent priority tasks"},{"label":"⚡ Board Automations","prompt":"How do I configure automation rules or export board data?"}]'
           strategy="afterInteractive"
         />
       </Providers>
