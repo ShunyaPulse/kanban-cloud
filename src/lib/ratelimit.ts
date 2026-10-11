@@ -46,17 +46,30 @@ export async function rateLimit(
 export function getClientIp(headers: Headers | Record<string, string | string[] | undefined>): string {
   if (headers && typeof (headers as Headers).get === "function") {
     const reqHeaders = headers as Headers;
+    const cfIp = reqHeaders.get("cf-connecting-ip");
+    if (cfIp) return cfIp.trim();
     const forwarded = reqHeaders.get("x-forwarded-for");
-    if (forwarded) return forwarded.split(",")[0].trim();
+    if (forwarded) {
+      const parts = forwarded.split(",").map((p) => p.trim()).filter(Boolean);
+      if (parts.length > 0) return parts[parts.length - 1];
+    }
     const realIp = reqHeaders.get("x-real-ip");
     if (realIp) return realIp.trim();
   } else if (headers) {
     const raw = headers as Record<string, string | string[] | undefined>;
+    const cfIp = raw["cf-connecting-ip"];
+    if (typeof cfIp === "string" && cfIp.trim()) return cfIp.trim();
     const forwarded = raw["x-forwarded-for"];
-    if (typeof forwarded === "string") return forwarded.split(",")[0].trim();
-    if (Array.isArray(forwarded) && forwarded[0]) return forwarded[0].split(",")[0].trim();
+    if (typeof forwarded === "string" && forwarded.trim()) {
+      const parts = forwarded.split(",").map((p) => p.trim()).filter(Boolean);
+      if (parts.length > 0) return parts[parts.length - 1];
+    }
+    if (Array.isArray(forwarded) && forwarded.length > 0) {
+      const last = forwarded[forwarded.length - 1];
+      if (last) return last.trim();
+    }
     const realIp = raw["x-real-ip"];
-    if (typeof realIp === "string") return realIp.trim();
+    if (typeof realIp === "string" && realIp.trim()) return realIp.trim();
   }
   return "unknown-ip";
 }

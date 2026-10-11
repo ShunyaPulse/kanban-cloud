@@ -215,6 +215,7 @@ export async function verifyEmailOTP(email: string, code: string): Promise<{ suc
   }
 
   if (storedOTP !== cleanCode) {
+    const newAttempts = attempts + 1;
     try {
       const db = getDb();
       await db.query('UPDATE email_otps SET attempts = attempts + 1 WHERE LOWER(TRIM(email)) = $1', [cleanEmail]);
@@ -222,19 +223,14 @@ export async function verifyEmailOTP(email: string, code: string): Promise<{ suc
       if (redis) await redis.incr(`otp:attempts:${cleanEmail}`);
     } catch {}
 
-    const remaining = 4 - attempts;
+    const remaining = Math.max(0, 5 - newAttempts);
     return {
       success: false,
       message: `Incorrect OTP code. ${remaining > 0 ? `${remaining} attempt(s) remaining.` : 'OTP invalidated.'}`
     };
   }
 
-  // If recently used within 60 seconds grace period (handles NextAuth multi-invocation):
-  if (isRecentlyUsed) {
-    return { success: true, message: 'OTP verified successfully.' };
-  }
-
-  // Mark as used in DB with timestamp
+  // Mark as used immediately in DB with timestamp to prevent replay
   try {
     const db = getDb();
     await db.query('UPDATE email_otps SET used_at = NOW() WHERE LOWER(TRIM(email)) = $1', [cleanEmail]);
