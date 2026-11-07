@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getDb, initDb } from '@/lib/db';
 import { rateLimit, getClientIp, getClientSubnet } from '@/lib/ratelimit';
 import { verifyShieldSolution, verifyCloudflareTurnstile } from '@/lib/bot-shield';
+import { isScannerOrTestProbe, verifyDomainHasDeliverableMx } from '@/lib/email-shield';
 import bcrypt from 'bcryptjs';
 
 export async function POST(req: Request) {
@@ -52,7 +53,8 @@ export async function POST(req: Request) {
         shield.timestamp,
         shield.targetDifficulty,
         shield.signature,
-        shield.solution
+        shield.solution,
+        ip
       );
       if (!isValidShield) {
         return NextResponse.json(
@@ -119,6 +121,20 @@ export async function POST(req: Request) {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(cleanEmail) || cleanEmail.length > 100) {
       return NextResponse.json({ error: 'Invalid email address format' }, { status: 400 });
+    }
+
+    // Silent tarpit for scanner/test probe domains
+    if (isScannerOrTestProbe(cleanEmail)) {
+      await new Promise((r) => setTimeout(r, 400));
+      return NextResponse.json({ success: true, user: { id: "0", name: "Guest", email: cleanEmail } });
+    }
+
+    // Pre-flight DNS MX verification
+    const atIdx = cleanEmail.lastIndexOf('@');
+    const domain = cleanEmail.slice(atIdx + 1);
+    const hasMx = await verifyDomainHasDeliverableMx(domain);
+    if (!hasMx) {
+      return NextResponse.json({ error: 'The specified email domain cannot receive incoming messages.' }, { status: 400 });
     }
 
     if (password.length < 8 || password.length > 72) {

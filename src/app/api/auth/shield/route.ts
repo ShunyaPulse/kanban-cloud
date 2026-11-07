@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import { generateShieldChallenge } from "@/lib/bot-shield";
+import { getClientIp } from "@/lib/ratelimit";
 import { v4 as uuidv4 } from "uuid";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
-  const challenge = generateShieldChallenge();
+  const ip = getClientIp(req.headers);
+  const challenge = generateShieldChallenge(ip);
   const turnstileSiteKey = process.env.CLOUDFLARE_TURNSTILE_SITE_KEY || process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY || "";
   const res = NextResponse.json({ ...challenge, turnstileSiteKey });
 

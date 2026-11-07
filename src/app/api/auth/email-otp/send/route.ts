@@ -1,12 +1,18 @@
 import { NextResponse } from 'next/server';
 import { sendEmailOTP } from '@/lib/email-otp';
-import { getClientIp, rateLimit } from '@/lib/ratelimit';
+import { getClientIp, getClientSubnet, rateLimit } from '@/lib/ratelimit';
 import { verifyCloudflareTurnstile } from '@/lib/bot-shield';
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { email, purpose, turnstileToken } = body;
+    const { email, purpose, turnstileToken, hp_website } = body;
+
+    // Layer 1: Honeypot silent tarpit
+    if (hp_website) {
+      await new Promise((r) => setTimeout(r, 400));
+      return NextResponse.json({ success: true, message: 'OTP sent successfully to your email.' });
+    }
 
     if (!email || typeof email !== 'string' || !email.includes('@')) {
       return NextResponse.json({ error: 'Valid email address is required' }, { status: 400 });
@@ -14,6 +20,43 @@ export async function POST(req: Request) {
 
     const cleanEmail = email.trim().toLowerCase();
     const ip = getClientIp(req.headers);
+    const subnet = getClientSubnet(ip);
+
+    // Short-term burst protection: Max 2 OTP sends per 10 minutes per IP
+    const burstIpCheck = await rateLimit(`rate:email-otp-burst-ip:${ip}`, 2, 600);
+    if (!burstIpCheck.success) {
+      return NextResponse.json(
+        { error: 'Too many verification attempts from this IP address. Please wait a few minutes.' },
+        { status: 429 }
+      );
+    }
+
+    // Short-term burst protection: Max 4 OTP sends per 10 minutes per subnet
+    const burstSubnetCheck = await rateLimit(`rate:email-otp-burst-subnet:${subnet}`, 4, 600);
+    if (!burstSubnetCheck.success) {
+      return NextResponse.json(
+        { error: 'Too many verification requests from this network. Please wait a few minutes.' },
+        { status: 429 }
+      );
+    }
+
+    // Daily limit: Max 5 OTP sends per 24 hours per email
+    const dailyEmailCheck = await rateLimit(`rate:email-otp-daily:${cleanEmail}`, 5, 86400);
+    if (!dailyEmailCheck.success) {
+      return NextResponse.json(
+        { error: 'Daily verification limit reached for this email. Please try again tomorrow.' },
+        { status: 429 }
+      );
+    }
+
+    // General IP Rate limit: Max 5 OTP requests per IP per 5 minutes
+    const ipCheck = await rateLimit(`rate:email-otp-ip:${ip}`, 5, 300);
+    if (!ipCheck.success) {
+      return NextResponse.json(
+        { error: 'Too many OTP requests from this IP. Please wait a few minutes.' },
+        { status: 429 }
+      );
+    }
 
     // Verify Cloudflare Turnstile for Sign Up OTP requests (validates tokens and stops bot spam)
     if (purpose === 'signup' && process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY) {
@@ -44,15 +87,6 @@ export async function POST(req: Request) {
           { status: 409 }
         );
       }
-    }
-
-    // IP Rate limit: Max 5 OTP requests per IP per 5 minutes
-    const ipCheck = await rateLimit(`rate:email-otp-ip:${ip}`, 5, 300);
-    if (!ipCheck.success) {
-      return NextResponse.json(
-        { error: 'Too many OTP requests from this IP. Please wait a few minutes.' },
-        { status: 429 }
-      );
     }
 
     const result = await sendEmailOTP(email);

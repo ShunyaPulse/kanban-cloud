@@ -3,6 +3,7 @@ import nodemailer from 'nodemailer';
 import { getCache } from './cache';
 import { getDb, initDb } from './db';
 import { rateLimit } from './ratelimit';
+import { isScannerOrTestProbe, verifyDomainHasDeliverableMx } from './email-shield';
 
 // Transporter cache
 let transporter: ReturnType<typeof nodemailer.createTransport> | null = null;
@@ -10,7 +11,7 @@ let transporter: ReturnType<typeof nodemailer.createTransport> | null = null;
 function getTransporter() {
   if (transporter) return transporter;
 
-  const host = process.env.EMAIL_SERVER_HOST || process.env.SMTP_HOST;
+  const host = process.env.EMAIL_SERVER_HOST || process.env.SMTP_HOST || 'smtp.gmail.com';
   const port = parseInt(process.env.EMAIL_SERVER_PORT || process.env.SMTP_PORT || '465', 10);
   const user = process.env.EMAIL_SERVER_USER || process.env.SMTP_USER;
   const pass = process.env.EMAIL_SERVER_PASSWORD || process.env.SMTP_PASS || process.env.SMTP_PASSWORD;
@@ -22,8 +23,8 @@ function getTransporter() {
       secure: port === 465,
       auth: { user, pass },
       tls: {
-        rejectUnauthorized: true
-      }
+        rejectUnauthorized: true,
+      },
     });
     return transporter;
   }
@@ -43,13 +44,37 @@ export function generateNumericOTP(): string {
 export async function sendEmailOTP(email: string): Promise<{ success: boolean; message: string }> {
   const cleanEmail = email.trim().toLowerCase();
 
+  // 1A. Silent Tarpit for RFC Test & Scanner Domains (probe.*, example.com, etc.)
+  if (isScannerOrTestProbe(cleanEmail)) {
+    const jitter = 250 + Math.floor(Math.random() * 500);
+    await new Promise((r) => setTimeout(r, jitter));
+    return {
+      success: true,
+      message: 'OTP sent successfully to your email.',
+    };
+  }
+
+  // 1B. Pre-Flight DNS MX Verification (Reject unroutable domains before touching SMTP)
+  const atIdx = cleanEmail.lastIndexOf('@');
+  if (atIdx === -1) {
+    return { success: false, message: 'Invalid email address format.' };
+  }
+  const domain = cleanEmail.slice(atIdx + 1);
+  const hasDeliverableMx = await verifyDomainHasDeliverableMx(domain);
+  if (!hasDeliverableMx) {
+    return {
+      success: false,
+      message: 'The specified email domain cannot receive incoming messages.',
+    };
+  }
+
   // Rate limit: 1 OTP request per email per 30 seconds
   const rateKey = `rate:email-otp:${cleanEmail}`;
   const rateCheck = await rateLimit(rateKey, 1, 30);
   if (!rateCheck.success) {
     return {
       success: false,
-      message: 'Please wait 30 seconds before requesting another OTP.'
+      message: 'Please wait 30 seconds before requesting another OTP.',
     };
   }
 
@@ -84,7 +109,10 @@ export async function sendEmailOTP(email: string): Promise<{ success: boolean; m
     console.warn('[Email OTP Redis Save Warning]:', redisErr);
   }
 
-  const fromAddress = process.env.EMAIL_FROM || '"Kanban Cloud Security" <no-reply@kanbancloud.app>';
+  const fromAddress =
+    process.env.SMTP_FROM ||
+    process.env.EMAIL_FROM ||
+    '"Kanban Cloud Security" <shunyapulse42@gmail.com>';
   const mailTransporter = getTransporter();
 
   const htmlContent = `
@@ -115,22 +143,22 @@ export async function sendEmailOTP(email: string): Promise<{ success: boolean; m
         to: cleanEmail,
         subject: `${otp} is your Kanban Cloud Verification Code`,
         text: `Your Kanban Cloud verification code is: ${otp} (valid for 10 minutes).`,
-        html: htmlContent
+        html: htmlContent,
       });
       console.log(`[Email OTP] Sent to ${cleanEmail}`);
     } else if (process.env.RESEND_API_KEY) {
       await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-          'Content-Type': 'application/json'
+          Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           from: fromAddress,
           to: [cleanEmail],
           subject: `${otp} is your Kanban Cloud Verification Code`,
-          html: htmlContent
-        })
+          html: htmlContent,
+        }),
       });
       console.log(`[Email OTP via Resend] Sent to ${cleanEmail}`);
     } else {
@@ -148,7 +176,7 @@ export async function sendEmailOTP(email: string): Promise<{ success: boolean; m
 }
 
 /**
- * Verify 6-Digit Email OTP with Dual-Storage and Grace-Period Re-entry Protection
+ * Verify 6-Digit Email OTP with Dual-Storage and Strict Zero-Replay
  */
 export async function verifyEmailOTP(email: string, code: string): Promise<{ success: boolean; message: string }> {
   const cleanEmail = email.trim().toLowerCase();
@@ -161,7 +189,6 @@ export async function verifyEmailOTP(email: string, code: string): Promise<{ suc
   let storedOTP: string | null = null;
   let attempts = 0;
   let isExpired = false;
-  let isRecentlyUsed = false;
 
   // 1. Check PostgreSQL first (persistent store)
   try {
@@ -170,21 +197,20 @@ export async function verifyEmailOTP(email: string, code: string): Promise<{ suc
     const res = await db.query(
       `SELECT otp, attempts, 
               (expires_at < NOW()) AS is_expired,
-              (used_at IS NOT NULL AND used_at > NOW() - INTERVAL '60 seconds') AS is_recently_used,
-              (used_at IS NOT NULL AND used_at <= NOW() - INTERVAL '60 seconds') AS is_old_used
+              (used_at IS NOT NULL) AS is_used
        FROM email_otps 
        WHERE LOWER(TRIM(email)) = $1`,
       [cleanEmail]
     );
 
     if (res.rows.length > 0) {
-      if (res.rows[0].is_old_used) {
+      // Strict zero-replay: any used OTP burns immediately
+      if (res.rows[0].is_used) {
         return { success: false, message: 'OTP has already been used. Please request a new OTP.' };
       }
       storedOTP = res.rows[0].otp;
       attempts = res.rows[0].attempts || 0;
       isExpired = Boolean(res.rows[0].is_expired);
-      isRecentlyUsed = Boolean(res.rows[0].is_recently_used);
     }
   } catch (dbErr) {
     console.warn('[Email OTP DB Read Warning]:', dbErr);
@@ -226,11 +252,11 @@ export async function verifyEmailOTP(email: string, code: string): Promise<{ suc
     const remaining = Math.max(0, 5 - newAttempts);
     return {
       success: false,
-      message: `Incorrect OTP code. ${remaining > 0 ? `${remaining} attempt(s) remaining.` : 'OTP invalidated.'}`
+      message: `Incorrect OTP code. ${remaining > 0 ? `${remaining} attempt(s) remaining.` : 'OTP invalidated.'}`,
     };
   }
 
-  // Mark as used immediately in DB with timestamp to prevent replay
+  // Burn OTP immediately upon verification: mark used in DB and delete from Redis
   try {
     const db = getDb();
     await db.query('UPDATE email_otps SET used_at = NOW() WHERE LOWER(TRIM(email)) = $1', [cleanEmail]);

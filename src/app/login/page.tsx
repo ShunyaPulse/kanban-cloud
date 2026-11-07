@@ -9,7 +9,7 @@ import Script from "next/script";
 async function solveShieldPoW(salt: string, difficulty: number): Promise<string> {
   const prefix = "0".repeat(difficulty);
   let nonce = 0;
-  while (nonce < 100000) {
+  while (nonce < 1000000) {
     const text = `${salt}:${nonce}`;
     const msgBuffer = new TextEncoder().encode(text);
     const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
@@ -137,6 +137,7 @@ export default function LoginPage() {
           email,
           purpose: isLogin ? "login" : "signup",
           turnstileToken: !isLogin ? turnstileToken : undefined,
+          hp_website: hpWebsite,
         }),
       });
       const data = await res.json();
